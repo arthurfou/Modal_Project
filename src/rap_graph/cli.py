@@ -51,7 +51,7 @@ def _build_graph(args):
     common.nodes_stats(graph)
 
     graph = common.set_clusters(graph, args.method, k=args.k)
-    common.export_graph_to_gephi(graph, filename=args.output or f"{args.type}_{args.method}.gexf")
+    common.export_graph_to_gephi(graph, filename=args.output or f"{args.type}_{args.method}_new.gexf")
 
 
 def main():
@@ -90,7 +90,7 @@ def main():
     build.add_argument("--min-component", type=int,
                        help="Delete connected components smaller than this (default: 10 for collab, 5 otherwise)")
     build.add_argument("--no-plot", action="store_true", help="Do not plot the similarity distribution")
-    build.add_argument("--output", help="Output file name (default: <type>_<method>.gexf)")
+    build.add_argument("--output", help="Output file name (default: <type>_<method>_new.gexf)")
     build.set_defaults(func=_build_graph)
 
     args = parser.parse_args()

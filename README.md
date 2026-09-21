@@ -2,6 +2,25 @@
 
 School project for the **CSC_43M02_EP Modal – Exploration and Learning on Web Graphs** course at École polytechnique, by Arthur Fournier and Arthur Buis.
 
+<p align="center">
+  <img src="img/globalgraph.png" width="90%" alt="Collaboration graph of French rap artists, coloured by community">
+  <br>
+  <em>Collaboration graph of French rap artists, visualised in Gephi. Colours are the detected communities.</em>
+</p>
+
+<table>
+  <tr>
+    <td width="33%"><img src="img/subgraph1.png" alt="Zoom on a community of the collaboration graph"></td>
+    <td width="33%"><img src="img/subgraph2.png" alt="Zoom on another community of the collaboration graph"></td>
+    <td width="33%"><img src="img/similaritelastfm.png" alt="Last.fm similarity graph"></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Zoom on a community (Booba, Sofiane, Leto…)</em></td>
+    <td align="center"><em>Zoom on a community (Nekfeu, Alpha Wann, Sheldon…)</em></td>
+    <td align="center"><em>Last.fm similarity graph</em></td>
+  </tr>
+</table>
+
 We build and analyse three graphs of French rap artists from Spotify, Genius, MusicBrainz and Last.fm data:
 
 | Graph | Nodes | Edges |
@@ -95,12 +114,12 @@ uv run rap-graph fetch-featurings
 **3. Build, cluster and export a graph**
 
 ```bash
-uv run rap-graph build-graph collab                          # -> graphs/collab_louvain.gexf
+uv run rap-graph build-graph collab                          # -> graphs/collab_louvain_new.gexf
 uv run rap-graph build-graph embedding --no-plot
 uv run rap-graph build-graph lastfm --method greedy_modularity
 ```
 
-Small connected components are removed (fewer than 10 nodes for `collab`, 5 otherwise, see `--min-component`), graph statistics are printed, then communities are detected with `--method` (`louvain`, `k_clique`, `label_propagation`, `girvan_newman`, `greedy_modularity`).
+Small connected components are removed (fewer than 10 nodes for `collab`, 5 otherwise, see `--min-component`), graph statistics are printed, then communities are detected with `--method` (`louvain`, `k_clique`, `label_propagation`, `girvan_newman`, `greedy_modularity`). The result is saved to `graphs/<type>_<method>_new.gexf` (or `--output`), so the graphs committed in `graphs/` are never overwritten.
 
 **4. Explore in Gephi**
 
