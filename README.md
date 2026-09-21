@@ -1,6 +1,6 @@
 # French Rap Collaboration Graphs
 
-School project for the **CSC_43M02_EP Modal – Exploration and Learning on Web Graphs** course at École polytechnique, by Arthur Fournier and Arthur Buis.
+School project for the **CSC_43M02_EP Modal - Exploration and Learning on Web Graphs** course at École polytechnique, by Arthur Fournier and Arthur Buis.
 
 <p align="center">
   <img src="img/globalgraph.png" width="90%" alt="Collaboration graph of French rap artists, coloured by community">
@@ -10,28 +10,26 @@ School project for the **CSC_43M02_EP Modal – Exploration and Learning on Web 
 
 <table>
   <tr>
-    <td width="33%"><img src="img/subgraph1.png" alt="Zoom on a community of the collaboration graph"></td>
-    <td width="33%"><img src="img/subgraph2.png" alt="Zoom on another community of the collaboration graph"></td>
-    <td width="33%"><img src="img/similaritelastfm.png" alt="Last.fm similarity graph"></td>
+    <td width="50%"><img src="img/subgraph1.png" alt="Zoom on a community of the collaboration graph"></td>
+    <td width="50"><img src="img/subgraph2.png" alt="Zoom on another community of the collaboration graph"></td>
   </tr>
   <tr>
-    <td align="center"><em>Zoom on a community (Booba, Sofiane, Leto…)</em></td>
-    <td align="center"><em>Zoom on a community (Nekfeu, Alpha Wann, Sheldon…)</em></td>
-    <td align="center"><em>Last.fm similarity graph</em></td>
+    <td align="center"><em>Zoom on a community</em></td>
+    <td align="center"><em>Zoom on another community</em></td>
   </tr>
 </table>
 
-We build and analyse three graphs of French rap artists from Spotify, Genius, MusicBrainz and Last.fm data:
+We build and analyse three graphs of French rap artists with data collected from Spotify, Genius, MusicBrainz and Last.fm:
 
 | Graph | Nodes | Edges |
 |---|---|---|
-| **Collaborations** | Artists | Songs made together (featurings), weighted by the number of songs |
+| **Collaborations** (Main graph) | Artists | Songs made together (featurings), weighted by the number of songs |
 | **Lyrics embeddings** | Artists | Cosine similarity ≥ 0.98 between the mean [Word2Bezbar](https://huggingface.co/rapminerz/Word2Bezbar-large) vectors of their lyrics |
 | **Last.fm similarity** | Artists | Artists listed as similar by Last.fm, weighted by the match score |
 
 The graphs are stored in MongoDB, analysed with NetworkX (statistics, centralities, community detection) and visualised with [Gephi](https://gephi.org/).
 
-📄 **Report** (in French): [`report/modal_report_fr.pdf`](report/modal_report_fr.pdf) — also available [online](https://plmlatex.math.cnrs.fr/read/hvtgtnmvykbn).
+**Report** (available in French): [`report/modal_report_fr.pdf`](report/modal_report_fr.pdf). [Online report](https://plmlatex.math.cnrs.fr/read/hvtgtnmvykbn).
 
 ## Repository structure
 
@@ -54,16 +52,16 @@ report/                 # Project report (French)
 
 ### Data
 
-- `data/db_artists_clean.csv` — the 477 artists kept (Spotify id, popularity, followers, Genius id and url, MusicBrainz id).
-- `data/db_featurings_clean.csv` — the ~8,900 songs involving at least two of these artists.
-- `data/clean_artists_2.json` — the artists with their lyrics embeddings (MongoDB export).
+- `data/db_artists_clean.csv` - the 477 artists kept (Spotify id, popularity, followers, Genius id and url, MusicBrainz id).
+- `data/db_featurings_clean.csv` - the ~8,900 songs involving at least two of these artists.
+- `data/clean_artists_2.json` - the artists with their lyrics embeddings (MongoDB export).
 
 ### Graphs
 
-- `collab_louvain.gexf`, `collab_clique_percolation.gexf` — collaboration graph clustered with Louvain / clique percolation.
-- `embedding_louvain.gexf` — lyrics similarity graph clustered with Louvain.
-- `lastfm_louvain.gexf` — Last.fm similarity graph clustered with Louvain.
-- `collab_size_*.gephi`, `embedding_and_lastfm.gephi` — Gephi projects (node size by betweenness, degree, popularity/followers).
+- `collab_louvain.gexf`, `collab_clique_percolation.gexf` - collaboration graph clustered with Louvain / clique percolation.
+- `embedding_louvain.gexf` - lyrics similarity graph clustered with Louvain.
+- `lastfm_louvain.gexf` - Last.fm similarity graph clustered with Louvain.
+- `collab_size_*.gephi`, `embedding_and_lastfm.gephi` - Gephi projects (node size by betweenness, degree, popularity/followers).
 
 ## Setup
 
@@ -114,7 +112,7 @@ uv run rap-graph fetch-featurings
 **3. Build, cluster and export a graph**
 
 ```bash
-uv run rap-graph build-graph collab                          # -> graphs/collab_louvain_new.gexf
+uv run rap-graph build-graph collab     # -> graphs/collab_louvain_new.gexf
 uv run rap-graph build-graph embedding --no-plot
 uv run rap-graph build-graph lastfm --method greedy_modularity
 ```
