@@ -1,0 +1,33 @@
+[project]
+name = "rap-graph"
+version = "1.0.0"
+description = "Building and analysing graphs of French rap artists (collaborations, lyrics embeddings, Last.fm similarity)."
+readme = "README.md"
+authors = [
+    { name = "Arthur Fournier" },
+    { name = "Arthur Buis" },
+]
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "gensim>=4.4.0",
+    "huggingface-hub>=1.32.0",
+    "lyricsgenius>=3.12.2",
+    "matplotlib>=3.11.2",
+    "musicbrainzngs>=0.7.1",
+    "networkx>=3.6.1",
+    "numpy>=2.4.6",
+    "pymongo>=4.18.1",
+    "python-dotenv>=1.2.3",
+    "requests>=2.34.2",
+    "scikit-learn>=1.9.1",
+]
+
+[project.scripts]
+rap-graph = "rap_graph.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rap_graph"]

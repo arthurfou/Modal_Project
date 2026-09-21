@@ -1,8 +1,15 @@
-# Ignorer le fichier contenant les clés d'API
+# Secrets (API keys) — never commit them, use .env.example as a template
+.env
 API.md
-Word2Bezbar-large/
 
+# Python / uv
+.venv/
 __pycache__/
 *.pyc
-Word2Bezbar-large
-bin/
+
+# Word2Bezbar model (now downloaded automatically in the Hugging Face cache)
+Word2Bezbar-large/
+
+# Runtime outputs
+failed_artists.txt
+artists_list.txt

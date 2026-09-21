@@ -1,96 +1,107 @@
-# Projet de Modal CSC_43M02_EP - Exploration et apprentissage sur les graphes du Web : Analyse de collaborations musicales
+# French Rap Collaboration Graphs
 
-Ce projet permet de manipuler, analyser et visualiser un graphe de collaborations entre artistes musicaux, à partir de données issues de Spotify, Genius, MusicBrainz et Last.fm. Il utilise Python, NetworkX et MongoDB pour construire le graphe, extraire et gérer les données avant de les exploiter avec Gephi.
+School project for the **CSC_43M02_EP Modal – Exploration and Learning on Web Graphs** course at École polytechnique, by Arthur Fournier and Arthur Buis.
 
-Lien du rapport de notre modal : https://plmlatex.math.cnrs.fr/read/hvtgtnmvykbn
+We build and analyse three graphs of French rap artists from Spotify, Genius, MusicBrainz and Last.fm data:
 
-Les bases de données générées se trouvent dans le dossier data/ du repo.
+| Graph | Nodes | Edges |
+|---|---|---|
+| **Collaborations** | Artists | Songs made together (featurings), weighted by the number of songs |
+| **Lyrics embeddings** | Artists | Cosine similarity ≥ 0.98 between the mean [Word2Bezbar](https://huggingface.co/rapminerz/Word2Bezbar-large) vectors of their lyrics |
+| **Last.fm similarity** | Artists | Artists listed as similar by Last.fm, weighted by the match score |
 
-## Structure des fichiers
+The graphs are stored in MongoDB, analysed with NetworkX (statistics, centralities, community detection) and visualised with [Gephi](https://gephi.org/).
 
-- **graph.py**  
-  Construction et manipulation du graphe de collaborations.  
-  Fonctions principales :
-  - `build_graph` : Construit le graphe à partir de la base MongoDB.
-  - `delete_isolated_nodes` / `delete_low_degree_nodes` : Supprime les nœuds isolés ou de faible degré.
-  - `delete_small_components` : Supprime les composantes connexes de petite taille.
-  - `set_clusters` : Attribue des clusters selon différentes méthodes (Louvain, clique, etc.).
-  - `export_graph_to_gephi` : Exporte le graphe au format GEXF pour Gephi.
-  - `graph_stats`, `nodes_stats`, `cluster_stats` : Affiche des statistiques sur le graphe.
+📄 **Report** (in French): [`report/modal_report_fr.pdf`](report/modal_report_fr.pdf) — also available [online](https://plmlatex.math.cnrs.fr/read/hvtgtnmvykbn).
 
-- **update.py**  
-  Gestion de la base MongoDB et mise à jour des données artistes/chansons.  
-  Fonctions principales :
-  - `update_mongo` : Met à jour la base d’artistes (import, enrichissement, liens Genius/MusicBrainz).
-  - `update_featurings_and_songs_to_mongo` / `update_featurings_and_songs_to_mongo_v2` : Ajoute les collaborations (featurings) et chansons à la base.
-  - `final_update` : Pipeline complet de mise à jour et enrichissement.
-  - `update_json_to_mongo`, `update_csv_to_mongo` : Import de données depuis JSON ou CSV.
-  - `fail_update_mongo` : Gestion des cas d’échec lors de la mise à jour.
+## Repository structure
 
-- **spotify.py**  
-  Fonctions pour interroger l’API Spotify (récupération d’artistes, followers, etc.).
+```
+src/rap_graph/
+├── cli.py              # `rap-graph` command line entry point
+├── config.py           # Settings read from environment variables / .env
+├── db.py               # MongoDB pipeline: artists, Genius ids, embeddings, featurings
+├── embeddings.py       # Lyrics fetching, cleaning and Word2Bezbar artist vectors
+├── sources/            # API clients: spotify, genius, musicbrainz, lastfm
+└── graphs/
+    ├── common.py       # Clustering, statistics, cleaning and GEXF export
+    ├── collab.py       # Collaboration graph
+    ├── embedding.py    # Lyrics similarity graph
+    └── lastfm.py       # Last.fm similarity graph
+data/                   # Databases we built (artists, featurings, embeddings)
+graphs/                 # Exported graphs (.gexf) and Gephi projects (.gephi)
+report/                 # Project report (French)
+```
 
-- **genius.py**  
-  Fonctions pour interroger l’API Genius (récupération d’ID, featurings, etc.).
+### Data
 
-- **musicbrainz.py**  
-  Fonctions pour interroger la base de données MusicBrainz (récupération d’artistes, normalisation de noms, etc.) grâce à leur bibliothèque python.
+- `data/db_artists_clean.csv` — the 477 artists kept (Spotify id, popularity, followers, Genius id and url, MusicBrainz id).
+- `data/db_featurings_clean.csv` — the ~8,900 songs involving at least two of these artists.
+- `data/clean_artists_2.json` — the artists with their lyrics embeddings (MongoDB export).
 
-- **tools.py**  
-  Fonctions utilitaires (gestion des clés API, saisie utilisateur sécurisée, etc.).
-  `get_key`, `int_response` : Utilitaires pour la gestion des clés et des entrées utilisateur.
+### Graphs
 
-- **embeddings.py**  
-  Fonctions pour calculer et manipuler des embeddings d’artistes en utilisant notamment le modèle Word2Bezbar. Lien du modèle : https://huggingface.co/rapminerz/Word2Bezbar-large
+- `collab_louvain.gexf`, `collab_clique_percolation.gexf` — collaboration graph clustered with Louvain / clique percolation.
+- `embedding_louvain.gexf` — lyrics similarity graph clustered with Louvain.
+- `lastfm_louvain.gexf` — Last.fm similarity graph clustered with Louvain.
+- `collab_size_*.gephi`, `embedding_and_lastfm.gephi` — Gephi projects (node size by betweenness, degree, popularity/followers).
 
-- **graph_embedding.py**, **graph_lastfm.py**  
-  Ces deux fichiers, similaires au fichier graph, permettent de construire le graphe de similarité Last.Fm et le graphe des embeddings.
+## Setup
 
-- **data/**, **graphs/**  
-  Dossiers de données (notamment le fichier csv des artistes), et le fichier des graphes exportés par graph.py, graph_embedding.py et graph_lastfm.py.
+Requirements: [uv](https://docs.astral.sh/uv/) and a local [MongoDB](https://www.mongodb.com/docs/manual/installation/) server.
 
+```bash
+uv sync                    # creates .venv with Python 3.12 and all dependencies
+cp .env.example .env       # then fill in your API keys
+```
 
-## Lancer le projet
+API keys are only needed for the commands that call the corresponding service:
 
-1. **Installer les dépendances**  
-   ```
-   pip install pymongo networkx lyricsgenius musicbrainz
-   ```
+| Variable | Used by |
+|---|---|
+| `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` | `fetch-artists --search-new` |
+| `GENIUS_ACCESS_TOKEN` | `fetch-artists --genius/--embeddings`, `retry-failed`, `fetch-featurings` |
+| `LASTFM_API_KEY` | `build-graph lastfm` |
+| `MONGO_URI`, `MONGO_DB` | everything (defaults: `mongodb://localhost:27017/`, `rap_graph`) |
 
-2. **Générer ou importer les données**  
-   Depuis `update.py` :
-   - Récupération des données depuis internet dans la base MongoDB *final_db* :
-    ```python
-    update_mongo(db_name = "final_db", update_embeddings=True)
-    fail_update_mongo(db_name = "final_db", filename = "fail_final_update_mongo.txt")
-    ```
-   - Depuis un CSV :
-    ```python
-    update_csv_to_mongo(db_name="final_db")
-    ```
-    Puis récupération des featurings :
-    ```python
-    update_featurings_and_songs_to_mongo(db_name = "final_db")
-    ```
+The Word2Bezbar model is downloaded automatically from Hugging Face the first time embeddings are computed.
 
-4. **Générer le graphe**  
-   Dans graph.py pour le graphe des collaborations :
-    ```python
-    graph = build_graph("final_db", weighted = True)
+## Usage
 
-    # Nettoyage du graphe
-    graph = delete_small_components(graph, 10)
+Every command accepts `--db <name>` to choose the MongoDB database. Run `uv run rap-graph <command> --help` for all the options.
 
-    # Affichage des statistiques du graphe
-    graph_stats(graph)
-    nodes_stats(graph)
-    
-    #Clustering puis export du graphe
-    graph = set_clusters(graph, "louvain")
-    export_graph_to_gephi(graph, filename = "graph_louvain_final.gexf")
-    ```
+**1. Build the artists database**
 
-    Méthode similaire pour les fichiers graph_embedding.py et graph_lastfm.py.
+```bash
+# Search artists on Spotify and MusicBrainz, then find their Genius / MusicBrainz ids and embeddings
+uv run rap-graph fetch-artists --search-new --genius --musicbrainz --embeddings
 
-5. **Visualiser dans Gephi**  
-   Ouvrir le fichier `.gexf` du dossier graphs/ dans Gephi pour explorer le graphe.
+# Interactively find the artists that could not be matched on Genius
+uv run rap-graph retry-failed
+```
+
+Or start from our cleaned artists list (this **replaces** the `artists` collection):
+
+```bash
+uv run rap-graph import-artists-csv
+```
+
+**2. Fetch the featurings**
+
+```bash
+uv run rap-graph fetch-featurings
+```
+
+**3. Build, cluster and export a graph**
+
+```bash
+uv run rap-graph build-graph collab                          # -> graphs/collab_louvain.gexf
+uv run rap-graph build-graph embedding --no-plot
+uv run rap-graph build-graph lastfm --method greedy_modularity
+```
+
+Small connected components are removed (fewer than 10 nodes for `collab`, 5 otherwise, see `--min-component`), graph statistics are printed, then communities are detected with `--method` (`louvain`, `k_clique`, `label_propagation`, `girvan_newman`, `greedy_modularity`).
+
+**4. Explore in Gephi**
+
+Open the `.gexf` file (or one of our `.gephi` projects) from `graphs/` in Gephi. The `cluster` node attribute holds the detected community.
