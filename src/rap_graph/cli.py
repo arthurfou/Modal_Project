@@ -32,6 +32,12 @@ def _import_artists_csv(args):
     db.import_artists_csv(args.db, filename=args.file)
 
 
+def _import_featurings_csv(args):
+    from rap_graph import db
+
+    db.import_featurings_csv(args.db, filename=args.file)
+
+
 def _fetch_featurings(args):
     from rap_graph import db
 
@@ -74,9 +80,15 @@ def main():
     import_csv = commands.add_parser(
         "import-artists-csv", help="Replace the artists collection with the artists of a CSV file"
     )
-    import_csv.add_argument("--file", default=DATA_DIR / "db_artists_clean.csv",
-                            help="CSV file (default: data/db_artists_clean.csv)")
+    import_csv.add_argument("--file", default=DATA_DIR / "artists.csv", help="CSV file (default: data/artists.csv)")
     import_csv.set_defaults(func=_import_artists_csv)
+
+    import_feats = commands.add_parser(
+        "import-featurings-csv", help="Replace the featurings collection with the songs of a CSV file"
+    )
+    import_feats.add_argument("--file", default=DATA_DIR / "featurings.csv",
+                              help="CSV file (default: data/featurings.csv)")
+    import_feats.set_defaults(func=_import_featurings_csv)
 
     featurings = commands.add_parser("fetch-featurings", help="Fetch the featurings between the artists from Genius")
     featurings.add_argument("--max-pages", type=int, default=60, help="Genius song pages per artist (default: 60)")

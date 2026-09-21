@@ -161,7 +161,7 @@ def retry_failed_artists(db_name, filename=FAILED_ARTISTS_FILE):
             f.write(f"{name}\n")
 
 
-def import_artists_csv(db_name, filename=DATA_DIR / "db_artists_clean.csv"):
+def import_artists_csv(db_name, filename=DATA_DIR / "artists.csv"):
     """Replace the `artists` collection with the artists of a CSV file."""
     client, db = _open_db(db_name)
     collection = db["artists"]
@@ -180,6 +180,39 @@ def import_artists_csv(db_name, filename=DATA_DIR / "db_artists_clean.csv"):
                 "id_mb": row.get("id_mb"),
             })
     log(__file__, f"{collection.count_documents({})} artists imported.")
+    client.close()
+
+
+def _csv_list(row, field):
+    """Rebuild a list flattened by the CSV export into columns `field[0]`, `field[1]`, ..."""
+    values = []
+    i = 0
+    while f"{field}[{i}]" in row:
+        if row[f"{field}[{i}]"]:
+            values.append(row[f"{field}[{i}]"])
+        i += 1
+    return values
+
+
+def import_featurings_csv(db_name, filename=DATA_DIR / "featurings.csv"):
+    """Replace the `featurings` collection with the songs of a CSV file."""
+    client, db = _open_db(db_name)
+    collection = db["featurings"]
+    collection.delete_many({})
+
+    log(__file__, f"Reading {filename}...")
+    with open(filename, newline="", encoding="utf-8") as csvfile:
+        featurings = [
+            {
+                "_id": int(row["_id"]),
+                "title": row["title"],
+                "artists_names": _csv_list(row, "artists_names"),
+                "artists_genius_id": [int(float(value)) for value in _csv_list(row, "artists_genius_id")],
+            }
+            for row in csv.DictReader(csvfile)
+        ]
+    collection.insert_many(featurings)
+    log(__file__, f"{collection.count_documents({})} featurings imported.")
     client.close()
 
 

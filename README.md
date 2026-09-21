@@ -52,22 +52,22 @@ report/                 # Project report (French)
 
 ### Data
 
-- `data/db_artists_clean.csv` - the 477 artists kept (Spotify id, popularity, followers, Genius id and url, MusicBrainz id).
-- `data/db_featurings_clean.csv` - the ~8,900 songs involving at least two of these artists.
-- `data/clean_artists_2.json` - the artists with their lyrics embeddings (MongoDB export).
+- `data/artists.csv` - the 477 artists kept (Spotify id, popularity, followers, Genius id and url, MusicBrainz id).
+- `data/featurings.csv` - the ~8,900 songs involving at least two of these artists.
+- `data/artists_embeddings.json` - the same artists with their lyrics embeddings (MongoDB export).
 
 ### Graphs
 
-- `collab_louvain.gexf`, `collab_clique_percolation.gexf` - collaboration graph clustered with Louvain / clique percolation.
-- `embedding_louvain.gexf` - lyrics similarity graph clustered with Louvain.
-- `lastfm_louvain.gexf` - Last.fm similarity graph clustered with Louvain.
-- `collab_size_*.gephi`, `embedding_and_lastfm.gephi` - Gephi projects (node size by betweenness, degree, popularity/followers).
+- `collaborationgraph/` - collaboration graph clustered with Louvain and clique percolation (`.gexf`), and Gephi projects with node size by betweenness, degree and popularity/followers (`.gephi`).
+- `embeddinggraph/` - lyrics similarity graph clustered with Louvain, and a Gephi project combining the embedding and Last.fm graphs.
+- `lastfmgraph/` - Last.fm similarity graph clustered with Louvain.
 
 ## Setup
 
-Requirements: [uv](https://docs.astral.sh/uv/) and a local [MongoDB](https://www.mongodb.com/docs/manual/installation/) server.
+Requirements: [uv](https://docs.astral.sh/uv/) and [Docker](https://docs.docker.com/get-docker/) (to run MongoDB).
 
 ```bash
+docker run -d --name rap-mongo -p 27017:27017 -v rap-mongo-data:/data/db mongo:7
 uv sync                    # creates .venv with Python 3.12 and all dependencies
 cp .env.example .env       # then fill in your API keys
 ```
@@ -103,10 +103,22 @@ Or start from our cleaned artists list (this **replaces** the `artists` collecti
 uv run rap-graph import-artists-csv
 ```
 
+To build the embedding graph without recomputing the embeddings, import the artists with their embeddings instead:
+
+```bash
+docker exec -i rap-mongo mongoimport --db rap_graph --collection artists --jsonArray --drop < data/artists_embeddings.json
+```
+
 **2. Fetch the featurings**
 
 ```bash
 uv run rap-graph fetch-featurings
+```
+
+Or start from our cleaned featurings list (this **replaces** the `featurings` collection):
+
+```bash
+uv run rap-graph import-featurings-csv
 ```
 
 **3. Build, cluster and export a graph**
